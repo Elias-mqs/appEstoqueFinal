@@ -1,20 +1,16 @@
-
+import React, { useState, useEffect } from "react";
 import { Text, View, StyleSheet, FlatList, TextInput, Alert } from "react-native";
-import useStorage from "../../hooks/useStorage";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useState, useEffect } from "react";
 import { useIsFocused } from "@react-navigation/native";
 import { ItemList } from "../../components";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-
-
+import useStorage from "../../hooks/useStorage";
 
 export function ItemScreen() {
-
     const [listItens, setListItens] = useState([]);
     const { getItem, removeItem } = useStorage();
     const focused = useIsFocused();
-    const [searchText, setSearchText] = useState({ nome: '' });
+    const [searchText, setSearchText] = useState('');
     const [teste, setTeste] = useState([]);
     const [cres, setCres] = useState(true);
 
@@ -25,7 +21,7 @@ export function ItemScreen() {
             setTeste(itens);
         }
         loadItens();
-    }, [focused, listItens])
+    }, [focused]);
 
     useEffect(() => {
         try {
@@ -33,43 +29,43 @@ export function ItemScreen() {
                 setListItens(teste);
             } else {
                 setListItens(
-                    teste.filter(item => (item.nome?.toUpperCase().indexOf(searchText.nome.toUpperCase()) >= 0 || item.codigo.toUpperCase().indexOf(searchText.nome.toUpperCase()) > -1))
+                    teste.filter(item =>
+                        (item.nome?.toUpperCase().includes(searchText.toUpperCase()) ||
+                            item.codigo.toUpperCase().includes(searchText.toUpperCase()))
+                    )
                 );
             }
         } catch (error) {
             console.log('erro', error);
         }
-    }, [searchText, teste])
-
+    }, [searchText, teste]);
 
     const handleOrder = () => {
         let newList = [...listItens];
-        setCres(!cres)
+        setCres(!cres);
         if (cres) {
-            newList.sort((a, b) => (a.nome > b.nome ? 1 : a.nome < b.nome ? -1 : 0))
+            newList.sort((a, b) => (a.nome > b.nome ? 1 : a.nome < b.nome ? -1 : 0));
         } else {
-            newList.sort((a, b) => (a.nome > b.nome ? -1 : a.nome < b.nome ? 1 : 0))
+            newList.sort((a, b) => (a.nome > b.nome ? -1 : a.nome < b.nome ? 1 : 0));
         }
-
         setListItens(newList);
-
-    }
+    };
 
     const handleRemove = async (item) => {
         const itens = removeItem('@item', item);
         setListItens(itens);
-        console.log('Item removido')
-        Alert.alert('Info', 'Item removido com sucesso.')
-    }
+        console.log('Item removido');
+        Alert.alert('Info', 'Item removido com sucesso.');
+    };
 
     return (
-        <SafeAreaView style={{ flex: 1, }}>
+        <SafeAreaView style={{ flex: 1 }}>
 
             <View style={styles.header}>
-                <Text style={styles.title} >Lista de Itens</Text>
+                <Text style={styles.title}>Lista de Itens</Text>
             </View>
 
-            <View style={styles.content} >
+            <View style={styles.content}>
 
                 <View style={styles.searchContainer}>
 
@@ -77,7 +73,7 @@ export function ItemScreen() {
                         style={styles.searchInput}
                         placeholder='Pesquisar Código/Nome'
                         value={searchText}
-                        onChangeText={(t) => setSearchText(t)}
+                        onChangeText={setSearchText} // Alteração aqui
                     />
                     {cres ?
                         <MaterialCommunityIcons
@@ -96,17 +92,17 @@ export function ItemScreen() {
                     data={listItens}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item }) => {
-                        const obj = [item.id, item.nome, item.codigo, item.qtd]
+                        const obj = [item.id, item.nome, item.codigo, item.qtd];
                         return (
                             <ItemList removeItem={() => handleRemove(item)} data={obj} />
-                        )
+                        );
                     }}
                 />
 
             </View>
 
         </SafeAreaView>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -150,4 +146,4 @@ const styles = StyleSheet.create({
         paddingRight: 10,
         paddingLeft: 0,
     }
-})
+});
